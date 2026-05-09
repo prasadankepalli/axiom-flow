@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Axiom-Flow Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #111827;
+            --bg-card: rgba(17, 24, 39, 0.7);
+            --border: rgba(99, 102, 241, 0.2);
+            --border-hover: rgba(99, 102, 241, 0.5);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.3);
+            --success: #10b981;
+            --success-bg: rgba(16, 185, 129, 0.1);
+            --danger: #ef4444;
+            --danger-bg: rgba(239, 68, 68, 0.1);
+            --warning: #f59e0b;
+            --warning-bg: rgba(245, 158, 11, 0.1);
+            --radius: 16px;
+            --radius-sm: 10px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        /* Ambient background */
+        body::before {
+            content: '';
+            position: fixed; top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle at 30% 20%, rgba(99,102,241,0.06) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 80%, rgba(16,185,129,0.04) 0%, transparent 50%);
+            animation: ambientShift 20s ease-in-out infinite alternate;
+            z-index: 0;
+        }
+        @keyframes ambientShift {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(-5%, 3%) rotate(3deg); }
+        }
+
+        /* Layout */
+        .app { position: relative; z-index: 1; }
+        .header {
+            padding: 24px 40px;
+            display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(20px);
+            background: rgba(10, 14, 26, 0.8);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .logo { display: flex; align-items: center; gap: 14px; }
+        .logo-icon {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, var(--accent), #818cf8);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; font-weight: 700;
+            box-shadow: 0 0 24px var(--accent-glow);
+        }
+        .logo h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+        .logo span { color: var(--accent); }
+        .status-badge {
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 16px; border-radius: 100px;
+            background: var(--success-bg); border: 1px solid rgba(16,185,129,0.3);
+            font-size: 13px; color: var(--success); font-weight: 500;
+        }
+        .status-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+        .main { padding: 32px 40px; display: flex; flex-direction: column; gap: 28px; }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            backdrop-filter: blur(12px);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .card:hover { border-color: var(--border-hover); box-shadow: 0 0 30px rgba(99,102,241,0.05); }
+        .card-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .card-header h2 { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+        .card-body { padding: 24px; }
+
+        /* Grid */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+        /* Demo Buttons */
+        .demo-section { display: flex; gap: 12px; flex-wrap: wrap; }
+        .demo-btn {
+            padding: 10px 20px; border-radius: var(--radius-sm);
+            border: 1px solid var(--border); background: var(--bg-secondary);
+            color: var(--text-primary); font-family: 'Inter', sans-serif;
+            font-size: 13px; font-weight: 500; cursor: pointer;
+            transition: all 0.25s; display: flex; align-items: center; gap: 8px;
+        }
+        .demo-btn:hover { border-color: var(--accent); background: rgba(99,102,241,0.1); transform: translateY(-1px); }
+        .demo-btn.pass { border-color: rgba(16,185,129,0.3); }
+        .demo-btn.pass:hover { border-color: var(--success); background: var(--success-bg); }
+        .demo-btn.fail { border-color: rgba(239,68,68,0.3); }
+        .demo-btn.fail:hover { border-color: var(--danger); background: var(--danger-bg); }
+
+        /* Form */
+        .form-group { margin-bottom: 16px; }
+        .form-group label {
+            display: block; font-size: 12px; font-weight: 500;
+            color: var(--text-secondary); margin-bottom: 6px;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        textarea, input[type="text"] {
+            width: 100%; padding: 12px 16px;
+            background: var(--bg-secondary); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace; font-size: 13px;
+            resize: vertical; transition: border-color 0.25s;
+        }
+        textarea:focus, input:focus { outline: none; border-color: var(--accent); }
+        textarea { min-height: 80px; }
+
+        .btn-primary {
+            padding: 12px 28px; border: none; border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, var(--accent), #818cf8);
+            color: white; font-family: 'Inter', sans-serif;
+            font-size: 14px; font-weight: 600; cursor: pointer;
+            transition: all 0.25s; box-shadow: 0 4px 16px var(--accent-glow);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 24px var(--accent-glow); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        /* Results */
+        .results-panel { min-height: 200px; }
+        .result-empty {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 200px; color: var(--text-muted); font-size: 14px;
+        }
+        .result-empty .icon { font-size: 40px; margin-bottom: 12px; opacity: 0.3; }
+
+        .result-card {
+            padding: 16px; border-radius: var(--radius-sm);
+            border: 1px solid var(--border); margin-bottom: 12px;
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .result-card.pass { border-left: 3px solid var(--success); background: var(--success-bg); }
+        .result-card.fail { border-left: 3px solid var(--danger); background: var(--danger-bg); }
+
+        .result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .result-title { font-weight: 600; font-size: 14px; }
+        .score-badge {
+            padding: 4px 12px; border-radius: 100px; font-size: 12px;
+            font-weight: 700; font-family: 'JetBrains Mono', monospace;
+        }
+        .score-badge.pass { background: var(--success-bg); color: var(--success); border: 1px solid rgba(16,185,129,0.3); }
+        .score-badge.fail { background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); }
+        .result-analysis { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+        .result-meta { font-size: 11px; color: var(--text-muted); margin-top: 8px; font-family: 'JetBrains Mono', monospace; }
+
+        /* Overall Status */
+        .overall-status {
+            padding: 16px 24px; border-radius: var(--radius-sm);
+            display: flex; align-items: center; gap: 12px;
+            font-weight: 600; font-size: 15px; margin-bottom: 16px;
+            animation: slideIn 0.3s ease-out;
+        }
+        .overall-status.pass { background: var(--success-bg); border: 1px solid rgba(16,185,129,0.3); color: var(--success); }
+        .overall-status.fail { background: var(--danger-bg); border: 1px solid rgba(239,68,68,0.3); color: var(--danger); }
+        .overall-status .status-icon { font-size: 24px; }
+
+        /* Stat cards */
+        .stat-card {
+            padding: 20px; border-radius: var(--radius-sm);
+            background: var(--bg-secondary); border: 1px solid var(--border);
+            text-align: center;
+        }
+        .stat-value { font-size: 32px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+        .stat-label { font-size: 12px; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* Invariant list */
+        .invariant-item {
+            padding: 16px; border-radius: var(--radius-sm);
+            border: 1px solid var(--border); margin-bottom: 10px;
+            display: flex; align-items: flex-start; gap: 12px;
+        }
+        .invariant-icon {
+            width: 36px; height: 36px; border-radius: 10px;
+            background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; flex-shrink: 0;
+        }
+        .invariant-name { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+        .invariant-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+
+        /* Ledger table */
+        .ledger-table { width: 100%; border-collapse: collapse; }
+        .ledger-table th {
+            text-align: left; padding: 10px 14px; font-size: 11px;
+            color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border);
+        }
+        .ledger-table td {
+            padding: 12px 14px; font-size: 13px; border-bottom: 1px solid rgba(99,102,241,0.08);
+        }
+        .ledger-table tr:hover td { background: rgba(99,102,241,0.03); }
+
+        /* Spinner */
+        .spinner {
+            width: 20px; height: 20px; border: 2px solid var(--border);
+            border-top-color: var(--accent); border-radius: 50%;
+            animation: spin 0.6s linear infinite; display: inline-block;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Responsive */
+        @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } .main { padding: 20px; } }
+    </style>
+</head>
+<body>
+<div class="app">
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">Ax</div>
+            <h1>Axiom<span>-Flow</span></h1>
+        </div>
+        <div class="status-badge"><div class="status-dot"></div> Engine Online</div>
+    </header>
+
+    <main class="main">
+        <!-- Stats -->
+        <div class="grid-3" id="stats">
+            <div class="stat-card"><div class="stat-value" id="stat-total">0</div><div class="stat-label">Validations Run</div></div>
+            <div class="stat-card"><div class="stat-value" style="color:var(--success)" id="stat-pass">0</div><div class="stat-label">Passed</div></div>
+            <div class="stat-card"><div class="stat-value" style="color:var(--danger)" id="stat-fail">0</div><div class="stat-label">Failed</div></div>
+        </div>
+
+        <!-- Demo Scenarios -->
+        <div class="card">
+            <div class="card-header">
+                <h2>🎬 Demo Scenarios</h2>
+                <span style="font-size:12px;color:var(--text-muted)">One-click test cases</span>
+            </div>
+            <div class="card-body">
+                <div class="demo-section">
+                    <button class="demo-btn pass" onclick="loadDemo('pass10')">✅ 10% Discount (PASS)</button>
+                    <button class="demo-btn fail" onclick="loadDemo('fail20')">❌ 20% Discount (FAIL)</button>
+                    <button class="demo-btn pass" onclick="loadDemo('passNoDiscount')">✅ No Discount (PASS)</button>
+                    <button class="demo-btn fail" onclick="loadDemo('fail25')">❌ 25% Discount (FAIL)</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Playground + Results -->
+        <div class="grid-2">
+            <!-- Validation Playground -->
+            <div class="card">
+                <div class="card-header"><h2>🧪 Validation Playground</h2></div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>Agent Thought</label>
+                        <textarea id="inp-thought" placeholder="The agent's internal reasoning..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Agent Action</label>
+                        <input type="text" id="inp-action" placeholder="e.g. apply_discount, agent_response">
+                    </div>
+                    <div class="form-group">
+                        <label>Observation</label>
+                        <textarea id="inp-observation" placeholder="The result of the action..."></textarea>
+                    </div>
+                    <button class="btn-primary" id="btn-validate" onclick="runValidation()">
+                        Run Validation
+                    </button>
+                </div>
+            </div>
+
+            <!-- Results Panel -->
+            <div class="card">
+                <div class="card-header"><h2>📊 Validation Results</h2></div>
+                <div class="card-body results-panel" id="results">
+                    <div class="result-empty">
+                        <div class="icon">⚡</div>
+                        Submit an agent scenario to see validation results
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Invariant Registry + Ledger -->
+        <div class="grid-2">
+            <!-- Invariants -->
+            <div class="card">
+                <div class="card-header"><h2>📋 Invariant Registry</h2></div>
+                <div class="card-body" id="invariants">
+                    <div style="text-align:center;color:var(--text-muted);padding:20px">
+                        <span class="spinner"></span><br>Loading registered invariants...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ledger -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>📒 Semantic Ledger</h2>
+                    <span style="font-size:12px;color:var(--text-muted)" id="ledger-count">0 entries</span>
+                </div>
+                <div class="card-body">
+                    <table class="ledger-table">
+                        <thead><tr><th>Time</th><th>Invariant</th><th>Score</th><th>Status</th></tr></thead>
+                        <tbody id="ledger-body">
+                            <tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:40px">No validations recorded yet</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    // Stats
+    let stats = { total: 0, pass: 0, fail: 0 };
+    let ledgerEntries = [];
+
+    // Demo scenarios
+    const demos = {
+        pass10: {
+            thought: "Based on the client's excellent 5-year loss history with zero claims, I recommend a 10% discount off the base premium of $10,000. This is within our standard authority limits and aligns with our retention strategy for low-risk commercial accounts.",
+            action: "apply_discount",
+            observation: "Applied 10% discount reduction to the base premium. New premium: $9,000. Discount is within the 15% maximum threshold."
+        },
+        fail20: {
+            thought: "The client is requesting a significant rate reduction. Given competitive pressure, I will apply a 20% discount off the $10,000 base premium to retain this account. The loss ratio is acceptable at 45%.",
+            action: "apply_discount",
+            observation: "Applied 20% discount reduction. New premium: $8,000. This exceeds the standard discount authority of 15%."
+        },
+        passNoDiscount: {
+            thought: "After reviewing the submission, the risk profile does not warrant any premium modifications. The base rate is appropriate for this class of business.",
+            action: "finalize_premium",
+            observation: "Premium finalized at base rate of $10,000. No adjustments applied."
+        },
+        fail25: {
+            thought: "This is a key strategic account. To win the business from our competitor, I am applying an aggressive 25% discount off the base premium. The loss ratio projection supports this at 55%.",
+            action: "apply_discount",
+            observation: "Applied 25% discount reduction. New premium: $7,500. This significantly exceeds the 15% maximum discount threshold."
+        }
+    };
+
+    function loadDemo(key) {
+        const d = demos[key];
+        document.getElementById('inp-thought').value = d.thought;
+        document.getElementById('inp-action').value = d.action;
+        document.getElementById('inp-observation').value = d.observation;
+    }
+
+    window.onload = () => {
+        loadInvariants();
+    };
+
+    async function loadInvariants() {
+        try {
+            const res = await fetch('/api/invariants');
+            const data = await res.json();
+            const el = document.getElementById('invariants');
+            
+            if (data && data.length > 0) {
+                let html = '';
+                data.forEach(i => {
+                    html += `<div class="invariant-item">
+                        <div class="invariant-icon">${i.name.includes('Safety') ? '🛡' : '📋'}</div>
+                        <div>
+                            <div class="invariant-name">${i.name}</div>
+                            <div class="invariant-desc">${i.description}</div>
+                        </div>
+                    </div>`;
+                });
+                el.innerHTML = html;
+            }
+        } catch (err) {
+            console.error('Failed to load invariants:', err);
+        }
+    }
+
+    async function runValidation() {
+        const btn = document.getElementById('btn-validate');
+        const resultsEl = document.getElementById('results');
+
+        const payload = {
+            agentThought: document.getElementById('inp-thought').value,
+            agentAction: document.getElementById('inp-action').value,
+            observation: document.getElementById('inp-observation').value
+        };
+
+        if (!payload.agentThought || !payload.agentAction || !payload.observation) {
+            resultsEl.innerHTML = '<div class="result-empty"><div class="icon">⚠️</div>Please fill in all fields</div>';
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Validating...';
+        resultsEl.innerHTML = '<div class="result-empty"><span class="spinner"></span><br>Running semantic validation...</div>';
+
+        try {
+            const res = await fetch('/api/validate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            renderResults(data);
+        } catch (err) {
+            resultsEl.innerHTML = `<div class="result-empty"><div class="icon">❌</div>Error: ${err.message}</div>`;
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = 'Run Validation';
+        }
+    }
+
+    function renderResults(data) {
+        const el = document.getElementById('results');
+        const overall = data.overallPass;
+
+        // Update stats
+        stats.total++;
+        if (overall) stats.pass++; else stats.fail++;
+        document.getElementById('stat-total').textContent = stats.total;
+        document.getElementById('stat-pass').textContent = stats.pass;
+        document.getElementById('stat-fail').textContent = stats.fail;
+
+        let html = `<div class="overall-status ${overall ? 'pass' : 'fail'}">
+            <span class="status-icon">${overall ? '✅' : '🚫'}</span>
+            ${overall ? 'All Invariants Passed' : 'Validation Failed — Invariant Violated'}
+        </div>`;
+
+        if (data.results && data.results.length > 0) {
+            data.results.forEach(r => {
+                const cls = r.passed ? 'pass' : 'fail';
+                html += `<div class="result-card ${cls}">
+                    <div class="result-header">
+                        <span class="result-title">${r.evaluatorName} → ${r.invariantName}</span>
+                        <span class="score-badge ${cls}">${(r.score * 100).toFixed(0)}%</span>
+                    </div>
+                    <div class="result-analysis">${r.analysis}</div>
+                    <div class="result-meta">${new Date(r.timestamp).toLocaleTimeString()}</div>
+                </div>`;
+
+                // Add to ledger
+                addLedgerEntry(r);
+            });
+        } else {
+            html += '<div class="result-card pass"><div class="result-header"><span class="result-title">No invariants applicable</span><span class="score-badge pass">N/A</span></div><div class="result-analysis">No semantic invariants matched this action.</div></div>';
+        }
+
+        el.innerHTML = html;
+    }
+
+    function addLedgerEntry(r) {
+        const tbody = document.getElementById('ledger-body');
+        const cls = r.passed ? 'pass' : 'fail';
+        const time = new Date(r.timestamp).toLocaleTimeString();
+
+        // Clear placeholder on first entry
+        if (ledgerEntries.length === 0) tbody.innerHTML = '';
+
+        ledgerEntries.unshift(r);
+        const row = document.createElement('tr');
+        row.style.animation = 'slideIn 0.3s ease-out';
+        row.innerHTML = `<td>${time}</td><td>${r.invariantName}</td>
+            <td><span class="score-badge ${cls}" style="font-size:11px">${(r.score * 100).toFixed(0)}%</span></td>
+            <td style="color:var(--${r.passed ? 'success' : 'danger'})">${r.passed ? '✅ Pass' : '❌ Fail'}</td>`;
+        tbody.insertBefore(row, tbody.firstChild);
+
+        document.getElementById('ledger-count').textContent = `${ledgerEntries.length} entries`;
+    }
+</script>
+</body>
+</html>

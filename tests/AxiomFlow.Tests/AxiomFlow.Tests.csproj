@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\AxiomFlow.Core\AxiomFlow.Core.csproj" />
+    <ProjectReference Include="..\..\src\AxiomFlow.Evaluators\AxiomFlow.Evaluators.csproj" />
+    <ProjectReference Include="..\..\src\AxiomFlow.Samples.Insurance\AxiomFlow.Samples.Insurance.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentAssertions" Version="8.3.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="Moq" Version="4.20.72" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+
+</Project>

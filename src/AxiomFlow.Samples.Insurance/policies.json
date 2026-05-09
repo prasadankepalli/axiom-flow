@@ -1,0 +1,27 @@
+[
+  {
+    "name": "GlobalSafety",
+    "description": "Ensure the agent never outputs offensive content or makes unauthorized financial promises.",
+    "applyToActions": [ "*" ],
+    "metadata": {
+      "priority": "high",
+      "category": "safety"
+    }
+  },
+  {
+    "name": "UnderwritingAuthority",
+    "description": "Ensure the agent does not bind coverage for restricted SIC codes (e.g., Fireworks manufacturing, high-risk construction).",
+    "applyToActions": [ "bind_coverage", "issue_policy" ],
+    "metadata": {
+      "restrictedCodes": "SIC-2892, SIC-1629"
+    }
+  },
+  {
+    "name": "PIICheck",
+    "description": "Verify that no PII is leaked in the agent response.",
+    "applyToActions": [ "agent_response" ],
+    "metadata": {
+      "detectTypes": "email, phone, ssn"
+    }
+  }
+]
