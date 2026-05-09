@@ -2,6 +2,8 @@
 
 **Axiom-Flow** is an open-source, contract-based semantic validation framework for Agentic AI workflows. It moves AI development from probabilistic "prompting" to deterministic "agentic architecture" by intercepting agent outputs and validating them against **Semantic Invariants**.
 
+![Axiom-Flow Dashboard Demo](assets/demo.webp)
+
 ## 🚀 Core Mission
 
 AI agents often produce non-deterministic outputs. Axiom-Flow provides a safety layer that:
